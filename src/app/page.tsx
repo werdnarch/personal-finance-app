@@ -12,6 +12,7 @@ import DisplaySmall from "@/components/ui/DisplaySmall";
 import Chart from "@/components/ui/Chart";
 import TransactionContainer from "@/components/ui/TransactionContainer";
 import RecurringContainer from "@/components/ui/RecurringContainer";
+import Loading from "@/components/ui/Loading";
 
 export default function Home() {
   const { data, isPending, error } = useQuery({
@@ -21,7 +22,7 @@ export default function Home() {
 
   if (error) return "Error occured while fetching " + error;
 
-  if (isPending) return null;
+  if (isPending) return <Loading />;
 
   const balance = data.overview;
   const pots = data.pots;
