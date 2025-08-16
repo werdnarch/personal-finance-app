@@ -7,7 +7,6 @@ import { getOverviewPage } from "@/libs/action";
 import formatCurrency from "./helpers/formatCurrency";
 import JarIcon from "@/components/icons/JarIcon";
 import { BudgetType, PotType, TransactionType } from "./types";
-import { PieChart } from "recharts";
 import DisplaySmall from "@/components/ui/DisplaySmall";
 import Chart from "@/components/ui/Chart";
 import TransactionContainer from "@/components/ui/TransactionContainer";
@@ -28,30 +27,6 @@ export default function Home() {
   const pots = data.pots;
   const budgets = data.budgets;
   const transactions = data.transactions;
-
-  const now = new Date();
-
-  const dueSoonTotal = transactions
-    .filter(
-      (t) =>
-        t.category === "Bills" &&
-        t.recurring &&
-        new Date(t.date) <= new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-    )
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const upcomingTotal = transactions
-    .filter(
-      (t) =>
-        t.category === "Bills" &&
-        t.recurring &&
-        new Date(t.date) > new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
-    )
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const paidTotal = transactions
-    .filter((t) => t.category === "Bills" && !t.recurring)
-    .reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <Main pageName="Overview">
@@ -87,14 +62,12 @@ export default function Home() {
                 <div className="flex flex-col gap-2">
                   <p className="text-sm text-zinc-600">Total Saved</p>
                   <h3 className="font-bold text-3xl">
-                    {formatCurrency(
-                      pots.reduce((acc, pot) => acc + pot.total, 0)
-                    )}
+                    {formatCurrency(pots["Total Saved"])}
                   </h3>
                 </div>
               </div>
               <div className="flex-1 grid grid-cols-2 grid-rows-2 gap-3">
-                {pots.slice(0, 4).map((pot: PotType, index: number) => (
+                {pots.pots.map((pot: PotType, index: number) => (
                   <DisplaySmall
                     key={index}
                     name={pot.name}
@@ -108,18 +81,16 @@ export default function Home() {
 
           <Container containerName="Transactions" buttonName="See All">
             <section className="flex flex-col">
-              {transactions
-                .splice(0, 5)
-                .map((tr: TransactionType, index: number) => (
-                  <TransactionContainer
-                    key={`transaction-${index}`}
-                    amount={tr.amount}
-                    image={tr.avatar}
-                    name={tr.name}
-                    date={tr.date}
-                    index={index + 1}
-                  />
-                ))}
+              {transactions.map((tr: TransactionType, index: number) => (
+                <TransactionContainer
+                  key={`transaction-${index}`}
+                  amount={tr.amount}
+                  image={tr.avatar}
+                  name={tr.name}
+                  date={tr.date}
+                  index={index + 1}
+                />
+              ))}
             </section>
           </Container>
         </div>
@@ -147,12 +118,18 @@ export default function Home() {
             containerName="Recurring Bills"
             className="flex flex-col gap-4"
           >
-            <RecurringContainer category="Paid Bills" amount={paidTotal} />
+            <RecurringContainer
+              category="Paid Bills"
+              amount={data.summary.paid}
+            />
             <RecurringContainer
               category="Total Upcoming"
-              amount={upcomingTotal}
+              amount={data.summary.upcoming}
             />
-            <RecurringContainer category="Due Soon" amount={dueSoonTotal} />
+            <RecurringContainer
+              category="Due Soon"
+              amount={data.summary["due-soon"]}
+            />
           </Container>
         </div>
       </section>

@@ -3,8 +3,10 @@ import type { AppRouter } from "@/server/trpc/router";
 import {
   BudgetType,
   TransactionType,
+  type PaginatedTransactions,
   type OverviewType,
   type PotType,
+  OverviewPageType,
 } from "@/app/types";
 
 const trpc = createTRPCProxyClient<AppRouter>({
@@ -37,9 +39,12 @@ export const getPots = async () => {
 export const getBudgets = async () => {
   const res = await fetch("/api/budgets");
   if (!res.ok) throw new Error("Failed to fetch budgets");
-  const data: BudgetType[] = await res.json();
 
-  return data;
+  const data = await res.json();
+  const budgets: BudgetType[] = await data.budgets;
+  const transactions: TransactionType[] = await data.transactions;
+
+  return { budgets, transactions };
 };
 
 export const getTransactions = async () => {
@@ -49,13 +54,28 @@ export const getTransactions = async () => {
   return data;
 };
 
-export const getOverviewPage = async () => {
-  const [overview, pots, budgets, transactions] = await Promise.all([
-    getBalance(),
-    getPots(),
-    getBudgets(),
-    getTransactions(),
-  ]);
+export const getRecurring = async () => {
+  const res = await fetch("/api/transactions?recurring=true");
+  if (!res.ok) throw new Error("Failed to fetch transactions");
+  const data: TransactionType[] = await res.json();
+  return data;
+};
 
-  return { overview, pots, budgets, transactions };
+export const getOverviewPage = async () => {
+  const res = await fetch("/api/overview");
+  if (!res.ok) throw new Error("Failed to fetch overview");
+  const data: OverviewPageType = await res.json();
+  return data;
+};
+
+export const getPageTransactions = async (
+  page: number,
+  limit: number
+): Promise<PaginatedTransactions> => {
+  const res = await fetch(
+    `/api/transactions/paginated?page=${page}&limit=${limit}`
+  );
+  if (!res.ok) throw new Error("Failed to fetch paginated transactions");
+  const data: PaginatedTransactions = await res.json();
+  return data;
 };

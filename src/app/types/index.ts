@@ -32,3 +32,25 @@ export type Color = {
   name: string;
   theme: string;
 };
+
+export interface PaginatedTransactions {
+  data: TransactionType[];
+  page: number;
+  totalPages: number;
+  total: number;
+}
+
+export type OverviewPageType = {
+  overview: OverviewType;
+  pots: {
+    "Total Saved": number;
+    pots: PotType[];
+  };
+  transactions: TransactionType[];
+  budgets: BudgetType[];
+  summary: {
+    paid: number;
+    "due-soon": number;
+    upcoming: number;
+  };
+};

@@ -3,7 +3,7 @@ import Chart from "@/components/ui/Chart";
 import Container from "@/components/ui/Container";
 import Loading from "@/components/ui/Loading";
 import Main from "@/components/ui/Main";
-import { getOverviewPage } from "@/libs/action";
+import { getBudgets, getOverviewPage } from "@/libs/action";
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
 import { BudgetType, TransactionType } from "../types";
@@ -13,8 +13,8 @@ import BudgetContainer from "@/components/ui/BudgetContainer";
 
 export default function page() {
   const { data, isPending, error } = useQuery({
-    queryKey: ["get-overview-page"],
-    queryFn: getOverviewPage,
+    queryKey: ["get-budgets-page"],
+    queryFn: () => getBudgets(),
   });
 
   if (error) return "Error occured while fetching, " + error;
