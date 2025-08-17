@@ -54,3 +54,15 @@ export type OverviewPageType = {
     upcoming: number;
   };
 };
+
+export type CategoryType =
+  | "General"
+  | "Dining Out"
+  | "Groceries"
+  | "Entertainment"
+  | "Transportation"
+  | "Lifestyle"
+  | "Personal Care"
+  | "Bills"
+  | "Shopping"
+  | "Education";
