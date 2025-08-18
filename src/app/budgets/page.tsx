@@ -3,8 +3,8 @@ import Chart from "@/components/ui/Chart";
 import Container from "@/components/ui/Container";
 import Loading from "@/components/ui/Loading";
 import Main from "@/components/ui/Main";
-import { getBudgets } from "@/libs/action";
-import { useQuery } from "@tanstack/react-query";
+import { editBudget, getBudgets } from "@/libs/action";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { BudgetType, CategoryType, TransactionType } from "../types";
 import SpendingSummary from "@/components/ui/SpendingSummary";
@@ -15,6 +15,7 @@ import { colors } from "@/db/data";
 import z from "zod";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { addBudget } from "@/libs/action";
 
 const formSchema = z.object({
   maximum: z.number().min(1),
@@ -28,7 +29,26 @@ export default function Page() {
     queryFn: () => getBudgets(),
   });
 
-  const { register, handleSubmit, reset } = useForm<formType>({
+  const queryClient = useQueryClient();
+
+  const addBudgetMutation = useMutation({
+    mutationFn: addBudget,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-budgets-page"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    },
+  });
+
+  const editBudgetMutation = useMutation({
+    mutationFn: (data: { category: CategoryType; budget: BudgetType }) =>
+      editBudget(data.category, data.budget),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-budgets-page"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    },
+  });
+
+  const { register, handleSubmit, reset, setValue } = useForm<formType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       maximum: 0,
@@ -43,7 +63,14 @@ export default function Page() {
         colors.find((cl) => cl.name.toLowerCase() === theme.toLowerCase())
           ?.theme || "#277C78",
     };
-    console.log(newBudget);
+
+    task === "adding"
+      ? addBudgetMutation.mutate(newBudget)
+      : editBudgetMutation.mutate({
+          category: category as CategoryType,
+          budget: newBudget,
+        });
+
     reset();
     setCategory("General");
     setTheme("Green");
@@ -52,6 +79,7 @@ export default function Page() {
   };
 
   const [menuActive, setMenuActive] = useState<boolean>(false);
+  const [task, setTask] = useState<"editing" | "adding">("adding");
   const [theme, setTheme] = useState<string>("Green");
   const [category, setCategory] = useState<string>("General");
   const [maximumSpend, setMaximumSpend] = useState<number>(0);
@@ -106,6 +134,17 @@ export default function Page() {
                 name={budget.category as CategoryType}
                 theme={budget.theme}
                 maximum={budget.maximum}
+                onEditClick={() => {
+                  setTheme(
+                    colors.find((cl) => cl.theme === budget.theme)?.name ||
+                      "Green"
+                  );
+                  setCategory(budget.category);
+                  setValue("maximum", budget.maximum);
+                  setMaximumSpend(budget.maximum);
+                  setTask("editing");
+                  setMenuActive(true);
+                }}
                 spent={
                   transactions
                     .filter(
@@ -125,11 +164,12 @@ export default function Page() {
       <PopUp
         active={menuActive}
         setActive={setMenuActive}
-        title="Add New Budget"
+        title={task === "adding" ? "Add New Budget" : "Edit Budget"}
       >
         <p className="text-zinc-600 text-sm">
-          Choose a category to set a spending budget. These categories can help
-          you monitor spending.
+          {task === "adding"
+            ? "Choose a category to set a spending budget. These categories can help you monitor spending."
+            : "As your budgets change, feel free to update your spending limits."}
         </p>
 
         <form
@@ -190,7 +230,7 @@ export default function Page() {
                   : "cursor-pointer opacity-100"
               }`}
           >
-            Add Budget
+            {task === "adding" ? "Add Budget" : "Edit Budget"}
           </button>
         </form>
       </PopUp>

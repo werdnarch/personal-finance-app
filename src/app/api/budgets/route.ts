@@ -29,3 +29,15 @@ export async function POST(req: Request) {
   setBudgets(updatedBudgets);
   return NextResponse.json({ message: "Budget Added", updatedBudgets });
 }
+
+export async function PUT(req: Request) {
+  const { category, budget } = await req.json();
+
+  const updateBudgets = budgets.map((b) =>
+    b.category === category ? budget : b
+  );
+
+  setBudgets(updateBudgets);
+
+  return NextResponse.json({ message: "Budget Updated", updateBudgets });
+}

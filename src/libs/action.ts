@@ -1,4 +1,5 @@
 import { createTRPCProxyClient, httpBatchLink } from "@trpc/client";
+
 import type { AppRouter } from "@/server/trpc/router";
 import {
   BudgetType,
@@ -108,6 +109,25 @@ export const addBudget = async (budget: BudgetType) => {
 
   if (!res.ok) {
     throw new Error("Failed to add budget");
+  }
+
+  return res.json();
+};
+
+export const editBudget = async (
+  category: CategoryType,
+  budget: BudgetType
+) => {
+  const res = await fetch("/api/budgets", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ category, budget }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to update budget");
   }
 
   return res.json();

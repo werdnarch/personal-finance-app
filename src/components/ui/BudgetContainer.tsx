@@ -8,7 +8,7 @@ import Caret from "../icons/Caret";
 import { CategoryType, TransactionType } from "@/app/types";
 import Image from "next/image";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { deleteBudget } from "@/libs/action";
+import { addBudget, deleteBudget } from "@/libs/action";
 import PopUp from "./PopUp";
 
 interface ContainerProps {
@@ -17,6 +17,7 @@ interface ContainerProps {
   maximum: number;
   spent: number;
   transactions: TransactionType[];
+  onEditClick: () => void;
 }
 
 export default function BudgetContainer({
@@ -25,6 +26,7 @@ export default function BudgetContainer({
   maximum,
   spent,
   transactions,
+  onEditClick,
 }: ContainerProps) {
   const percentage = (Math.abs(spent) / maximum) * 100;
 
@@ -33,7 +35,7 @@ export default function BudgetContainer({
   const elliMenuRef = useRef<HTMLDivElement | null>(null);
   const elliButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  const mutation = useMutation({
+  const deleteBudgetMutation = useMutation({
     mutationFn: deleteBudget,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["get-budgets-page"] });
@@ -49,7 +51,7 @@ export default function BudgetContainer({
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as Node;
-      // check if click is outside BOTH the popup and the trigger
+
       if (
         elliMenuRef.current &&
         !elliMenuRef.current.contains(target) &&
@@ -99,7 +101,13 @@ export default function BudgetContainer({
                 : "opacity-0 pointer-events-none scale-90"
             } transition-all duration-200 ease-in-out`}
           >
-            <button className="p-2 px-4 cursor-pointer text-zinc-600">
+            <button
+              onClick={() => {
+                onEditClick();
+                setElliMenu(false);
+              }}
+              className="p-2 px-4 cursor-pointer text-zinc-600"
+            >
               Edit Budget
             </button>
             <hr className="text-zinc-200 w-[90%] mx-auto"></hr>
@@ -207,7 +215,7 @@ export default function BudgetContainer({
         <div className="w-full mt-4 flex flex-col gap-1">
           <button
             onClick={() => {
-              mutation.mutate(name);
+              deleteBudgetMutation.mutate(name);
               setDeleteMenu(false);
             }}
             className="bg-[#c94736] w-full p-4 rounded-md text-white cursor-pointer hover:bg-[#d46c5e] transition-all duration-200 ease-in-out"
