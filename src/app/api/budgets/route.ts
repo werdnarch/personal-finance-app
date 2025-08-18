@@ -16,7 +16,7 @@ export async function DELETE(req: Request) {
   if (index === -1) {
     return NextResponse.json({ error: "Budget not found" }, { status: 404 });
   }
-  budgets.splice(index, 1);
+  const newBudgets = budgets.splice(index, 1);
 
   setBudgets(budgets);
 
