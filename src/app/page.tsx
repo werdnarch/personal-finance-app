@@ -15,7 +15,7 @@ import Loading from "@/components/ui/Loading";
 
 export default function Home() {
   const { data, isPending, error } = useQuery({
-    queryKey: ["get-overview-page"],
+    queryKey: ["overview"],
     queryFn: getOverviewPage,
   });
 

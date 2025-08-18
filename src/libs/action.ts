@@ -7,6 +7,7 @@ import {
   type OverviewType,
   type PotType,
   OverviewPageType,
+  CategoryType,
 } from "@/app/types";
 
 const trpc = createTRPCProxyClient<AppRouter>({
@@ -78,4 +79,36 @@ export const getPageTransactions = async (
   if (!res.ok) throw new Error("Failed to fetch paginated transactions");
   const data: PaginatedTransactions = await res.json();
   return data;
+};
+
+export const deleteBudget = async (category: CategoryType) => {
+  const res = await fetch("/api/budgets", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ category }),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete budget");
+  }
+
+  return res.json();
+};
+
+export const addBudget = async (budget: BudgetType) => {
+  const res = await fetch("/api/budgets", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(budget),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to add budget");
+  }
+
+  return res.json();
 };

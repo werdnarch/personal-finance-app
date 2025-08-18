@@ -1,15 +1,18 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Container from "./Container";
 import Ellipsis from "../icons/Ellipsis";
 import formatCurrency from "@/app/helpers/formatCurrency";
 import { formatDate } from "@/app/helpers/formatDate";
 import Link from "next/link";
 import Caret from "../icons/Caret";
-import { TransactionType } from "@/app/types";
+import { CategoryType, TransactionType } from "@/app/types";
 import Image from "next/image";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { deleteBudget } from "@/libs/action";
+import PopUp from "./PopUp";
 
 interface ContainerProps {
-  name: string;
+  name: CategoryType;
   theme: string;
   maximum: number;
   spent: number;
@@ -25,7 +28,49 @@ export default function BudgetContainer({
 }: ContainerProps) {
   const percentage = (Math.abs(spent) / maximum) * 100;
 
+  const queryClient = useQueryClient();
+
+  const elliMenuRef = useRef<HTMLDivElement | null>(null);
+  const elliButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: deleteBudget,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["get-budgets-page"] });
+      queryClient.invalidateQueries({ queryKey: ["overview"] });
+    },
+  });
+  const [elliMenu, setElliMenu] = useState<boolean>(false);
+  const [deleteMenu, setDeleteMenu] = useState<boolean>(false);
+
   const remaining = maximum - Math.abs(spent);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      // check if click is outside BOTH the popup and the trigger
+      if (
+        elliMenuRef.current &&
+        !elliMenuRef.current.contains(target) &&
+        elliButtonRef.current &&
+        !elliButtonRef.current.contains(target)
+      ) {
+        setElliMenu(false);
+      }
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setElliMenu(false);
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [setElliMenu]);
 
   return (
     <Container className="flex flex-col gap-4">
@@ -36,9 +81,38 @@ export default function BudgetContainer({
         ></div>
         <h1 className="text-lg font-bold">{name}</h1>
 
-        <button className="ml-auto cursor-pointer text-zinc-400 hover:text-black transition-all duration-200 ease-in-out">
-          <Ellipsis />
-        </button>
+        <div className="ml-auto relative">
+          <button
+            ref={elliButtonRef}
+            onClick={() => setElliMenu((prev) => !prev)}
+            className=" cursor-pointer text-zinc-400 hover:text-black transition-all duration-200 ease-in-out"
+          >
+            <Ellipsis />
+          </button>
+
+          <div
+            ref={elliMenuRef}
+            className={`absolute top-full right-0 shadow-[0_4px_10px_rgb(0,0,0,0.6)] bg-white rounded-md min-w-30 text-sm ${
+              elliMenu
+                ? "opacity-100"
+                : "opacity-0 pointer-events-none scale-90"
+            } transition-all duration-200 ease-in-out`}
+          >
+            <button className="p-2 px-4 cursor-pointer text-zinc-600">
+              Edit Budget
+            </button>
+            <hr className="text-zinc-200 w-[90%] mx-auto"></hr>
+            <button
+              onClick={() => {
+                setElliMenu(false);
+                setDeleteMenu(true);
+              }}
+              className="p-2 px-4 cursor-pointer whitespace-nowrap text-red-400"
+            >
+              Delete Budget
+            </button>
+          </div>
+        </div>
       </header>
 
       <p className="text-zinc-500 text-sm">
@@ -119,6 +193,35 @@ export default function BudgetContainer({
           ))}
         </div>
       </div>
+
+      <PopUp
+        active={deleteMenu}
+        setActive={setDeleteMenu}
+        title={`Delete "${name}"?`}
+      >
+        <p className="text-sm text-zinc-500">
+          Are you sure you want to delete this budget? This action cannot be
+          reversed, and all the data inside it will be removed forever.
+        </p>
+        <div className="w-full mt-4 flex flex-col gap-1">
+          <button
+            onClick={() => {
+              mutation.mutate(name);
+              setDeleteMenu(false);
+            }}
+            className="bg-[#c94736] w-full p-4 rounded-md text-white cursor-pointer hover:bg-[#d46c5e] transition-all duration-200 ease-in-out"
+          >
+            <p className="text-sm font-bold">Yes, Confirm Deletion</p>
+          </button>
+
+          <button
+            onClick={() => setDeleteMenu(false)}
+            className="w-fit mx-auto cursor-pointer p-3"
+          >
+            <p className="text-sm">No, Go Back</p>
+          </button>
+        </div>
+      </PopUp>
     </Container>
   );
 }

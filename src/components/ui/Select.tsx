@@ -61,14 +61,14 @@ export default function Select({
   return (
     <div className="relative">
       <label className="flex flex-col gap-1">
-        <p>{label}</p>
+        <p className="text-zinc-600 font-bold text-[0.8rem]">{label}</p>
         <div
           onClick={(e) => {
             e.stopPropagation();
             setActive((prev) => !prev);
           }}
           ref={selectRef}
-          className="group border border-zinc-500 p-2 px-3 rounded-sm cursor-pointer flex items-center justify-between"
+          className="group border border-zinc-500 p-3 px-4 rounded-sm cursor-pointer flex items-center justify-between"
         >
           <div className="flex items-center gap-1">
             {found && (
@@ -97,7 +97,7 @@ export default function Select({
           <div
             onClick={() => handleSelect(option)}
             key={index}
-            className="p-2 px-4 hover:bg-blue-500 hover:text-white transition-all duration-150 ease-in-out cursor-pointer flex items-center gap-3"
+            className="p-1 px-4 hover:bg-blue-500 hover:text-white transition-all duration-150 ease-in-out cursor-pointer flex items-center gap-3"
           >
             {colors.find((color) => color.name === option) && (
               <div
