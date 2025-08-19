@@ -95,7 +95,10 @@ export default function Page() {
     <Main
       pageName="Budgets"
       buttonName="Add New Budget"
-      onClick={() => setMenuActive(true)}
+      onClick={() => {
+        setMenuActive(true);
+        setTask("adding");
+      }}
     >
       <section className="flex w-full gap-8">
         <div className="w-[40%]">
@@ -202,7 +205,7 @@ export default function Page() {
             <div className="w-full relative">
               <input
                 {...register("maximum", { valueAsNumber: true })}
-                defaultValue={maximumSpend}
+                value={maximumSpend}
                 onChange={(e) => setMaximumSpend(Number(e.target.value))}
                 type="number"
                 className="border w-full outline-0 border-zinc-500 p-3 px-10 rounded-sm cursor-pointer flex items-center justify-between"
