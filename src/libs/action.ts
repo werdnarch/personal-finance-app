@@ -198,3 +198,18 @@ export const deletePot = async (id: number) => {
 
   return res.json();
 };
+
+export const editPot = async (
+  id: number,
+  pot: PotType
+): Promise<{ message: string; pots: PotType[] }> => {
+  const res = await fetch("/api/pots", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id, pot }),
+  });
+
+  if (!res.ok) throw new Error("Failed to update pot");
+
+  return res.json();
+};

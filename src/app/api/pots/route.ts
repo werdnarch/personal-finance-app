@@ -54,3 +54,29 @@ export async function DELETE(req: Request) {
     return Response.json({ error: "Failed to delete pot" }, { status: 500 });
   }
 }
+
+export async function PUT(req: Request) {
+  try {
+    const body = await req.json();
+    const { id, pot }: { id: number; pot: PotType } = body;
+
+    const potExists = pots.some((p) => p.id === id);
+    if (!potExists) {
+      return NextResponse.json({ error: "Pot not found" }, { status: 404 });
+    }
+
+    const updatedPots = pots.map((p) => (p.id === id ? { ...p, ...pot } : p));
+
+    setPots(updatedPots);
+
+    return NextResponse.json({
+      message: "Pot updated successfully",
+      pots: updatedPots,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to update pot", details: (error as Error).message },
+      { status: 500 }
+    );
+  }
+}
