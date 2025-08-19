@@ -66,3 +66,5 @@ export type CategoryType =
   | "Bills"
   | "Shopping"
   | "Education";
+
+export type CreatePotType = Omit<PotType, "id">;

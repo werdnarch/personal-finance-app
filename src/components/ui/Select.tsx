@@ -68,7 +68,7 @@ export default function Select({
             setActive((prev) => !prev);
           }}
           ref={selectRef}
-          className="group border border-zinc-500 p-3 px-4 rounded-sm cursor-pointer flex items-center justify-between"
+          className="group border border-zinc-500 p-3 px-4 rounded-md cursor-pointer flex items-center justify-between"
         >
           <div className="flex items-center gap-1">
             {found && (

@@ -9,6 +9,7 @@ import {
   type PotType,
   OverviewPageType,
   CategoryType,
+  CreatePotType,
 } from "@/app/types";
 
 const trpc = createTRPCProxyClient<AppRouter>({
@@ -164,4 +165,36 @@ export const editPotAmount = async ({
     console.error("Error updating pot amount:", error);
     throw error;
   }
+};
+
+export const addPot = async (pot: CreatePotType) => {
+  const res = await fetch("/api/pots", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(pot),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to add pots");
+  }
+
+  return res.json();
+};
+
+export const deletePot = async (id: number) => {
+  const res = await fetch("/api/pots", {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(id),
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete pot");
+  }
+
+  return res.json();
 };

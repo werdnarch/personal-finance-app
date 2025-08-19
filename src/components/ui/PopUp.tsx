@@ -39,7 +39,7 @@ export default function PopUp({
 
   return (
     <section
-      className={`h-full w-full ${
+      className={`h-full w-full z-100 ${
         active ? "opacity-100" : "opacity-0 pointer-events-none"
       } absolute top-0 left-0 flex items-center justify-center bg-black/30 transition-opacity duration-200 ease-in-out`}
     >

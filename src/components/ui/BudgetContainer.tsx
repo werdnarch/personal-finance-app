@@ -128,10 +128,14 @@ export default function BudgetContainer({
         Maximum of {formatCurrency(maximum)}
       </p>
 
-      <div className="h-8 w-full bg-[#f8f4f0] overflow-hidden rounded-sm">
+      <div className="h-8 w-full bg-[#f8f4f0] overflow-hidden rounded-sm ">
         <div
-          style={{ backgroundColor: `${theme}`, width: `${percentage}%` }}
-          className="h-full transition-all duration-150 ease-in-out"
+          style={{
+            backgroundColor: `${theme}`,
+            width: `${percentage}%`,
+            maxWidth: `100%`,
+          }}
+          className="h-full  transition-all duration-150 ease-in-out"
         ></div>
       </div>
 

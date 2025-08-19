@@ -87,6 +87,7 @@ export default function ButtonContent({
           <div
             style={{
               backgroundColor: `${theme}`,
+              maxWidth: `100%`,
               width: `${
                 ((task === "add" ? total + amount : total - amount) / target) *
                 100
