@@ -132,3 +132,36 @@ export const editBudget = async (
 
   return res.json();
 };
+
+export const editPotAmount = async ({
+  id,
+  amount,
+  task,
+}: {
+  id: number;
+  amount: number;
+  task: "add" | "withdraw";
+}) => {
+  try {
+    const response = await fetch(`/api/pots/${id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount,
+        task,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update pot amount");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error updating pot amount:", error);
+    throw error;
+  }
+};
